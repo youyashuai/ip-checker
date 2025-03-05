@@ -93,10 +93,23 @@ def parse_ip_risk(html):
 
 def parse_window_x(html):
     logger.info('Parsing window.x value...')
-    match = re.search(r"window\.x\s*=\s*'([^']+)'", html)
+    match = re.search(r"window\.x\d*\s*=\s*'([^']+)'", html)
     window_x = match.group(1) if match else None
     logger.info(f'Parsed window.x: {window_x}')
-    return window_x
+    return parse_window_x1_to_jskey(window_x)
+
+
+def parse_window_x1_to_jskey(window_x1):
+    """
+    解析 `window.x1` 的值，按每 4 个字符切分，转换为十六进制并累加 8，返回 `jskey`
+    :param window_x1: 输入的字符串
+    :return: 解析出的 `jskey` 值 (整数)
+    """
+    hash_value = 0
+    for i in range(0, 32, 4):
+        hex_value = int(window_x1[i:i+4], 16)  # 提取 4 个字符，转换为十六进制
+        hash_value += hex_value + 8
+    return str(hash_value)
 
 
 def parse_ping0_risk(html_content):
